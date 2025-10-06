@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -13,19 +13,20 @@ import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 
-const Item = ({ title, to, icon, selected, setSelected }) => {
+// 🔁 Item ahora recibe la ruta actual (currentPath) para marcar activo
+const Item = ({ title, to, icon, currentPath }) => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     return (
         <MenuItem
-            active={selected === title}
-            style={{
-                color: colors.grey[100],
-            }}
-            onClick={() => setSelected(title)}
+            active={currentPath === to} // 👈 activo si la URL coincide
+            style={{ color: colors.grey[100] }}
             icon={icon}
         >
-            <Typography>{title}</Typography>
+            {/* Texto del item (tamaño + peso) */}
+            <Typography fontSize="18px">
+                {title}
+            </Typography>
             <Link to={to} />
         </MenuItem>
     );
@@ -35,14 +36,14 @@ const Sidebar = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [selected, setSelected] = useState("Dashboard");
+    const { pathname } = useLocation(); // 👈 ruta actual
 
     return (
         <Box
             sx={{
                 "& .pro-sidebar-inner": {
                     background: `${colors.primary[400]} !important`,
-                    minHeight: "100vh !important",  // 👈 ocupa toda la altura del documento
+                    minHeight: "100vh !important",
                 },
                 "& .pro-icon-wrapper": {
                     backgroundColor: "transparent !important",
@@ -50,12 +51,21 @@ const Sidebar = () => {
                 "& .pro-inner-item": {
                     padding: "5px 35px 5px 20px !important",
                 },
+                // Tamaño global del texto de los items
+                "& .pro-inner-item > span": {
+                    fontSize: "18px",
+                    lineHeight: 1.2,
+                },
                 "& .pro-inner-item:hover": {
                     color: "#000000ff !important",
                 },
+                // Activo más marcado
                 "& .pro-menu-item.active": {
                     backgroundColor: "#E3D5D5 !important",
                     borderRadius: "10px",
+                },
+                "& .pro-menu-item.active > .pro-inner-item > span": {
+                    fontWeight: 700,
                 },
             }}
         >
@@ -84,9 +94,6 @@ const Sidebar = () => {
                                     src={`../../assets/logo.png`}
                                     style={{ cursor: "pointer" }}
                                 />
-                                {/* <Typography variant="h3" color={colors.grey[100]}>
-                                    ADMINS
-                                </Typography> */}
                                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                                     <MenuOutlinedIcon />
                                 </IconButton>
@@ -94,32 +101,33 @@ const Sidebar = () => {
                         )}
                     </MenuItem>
 
-                    {/* {!isCollapsed && (
-                        <Box mb="25px">
-                            <Box display="flex" justifyContent="center" alignItems="center">
-                                <img
-                                    alt="profile-user"
-                                    width="100px"
-                                    height="100px"
-                                    src={`../../assets/logo.jpg`}
-                                    style={{ cursor: "pointer", borderRadius: "50%" }}
-                                />
-                            </Box>
-                        </Box>
-                    )} */}
-
                     <Box paddingLeft={isCollapsed ? undefined : "10%"}>
                         {/* Sidebar */}
                         <Item
                             title="Inicio"
                             to="/inicio"
                             icon={<HomeOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
+                            currentPath={pathname} // 👈 pasamos ruta actual
                         />
+
+                        {/* Usuarios */}
+                        <Typography
+                            fontSize={28}
+                            color={colors.grey[300]}
+                            sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
+                        >
+                            Usuarios
+                        </Typography>
+                        <Item
+                            title="Usuarios"
+                            to="/verUsuarios"
+                            icon={<PeopleOutlinedIcon />}
+                            currentPath={pathname}
+                        />
+
                         {/* Socios */}
                         <Typography
-                            variant="h6"
+                            fontSize={28}
                             color={colors.grey[300]}
                             sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
                         >
@@ -129,28 +137,12 @@ const Sidebar = () => {
                             title="Socios"
                             to="/socios"
                             icon={<PeopleOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
+                            currentPath={pathname}
                         />
-                        {/* <Item
-                            title="Contacts Information"
-                            to="/contacts"
-                            icon={<ContactsOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
-                        />
-                        <Item
-                            title="Invoices Balances"
-                            to="/invoices"
-                            icon={<ReceiptOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
-                        /> */}
-
 
                         {/* Instructores */}
                         <Typography
-                            variant="h6"
+                            fontSize={22}
                             color={colors.grey[300]}
                             sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
                         >
@@ -158,30 +150,14 @@ const Sidebar = () => {
                         </Typography>
                         <Item
                             title="Instructores"
-                            to="/contacts"
+                            to="/instructores"
                             icon={<PersonOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
+                            currentPath={pathname}
                         />
-                        {/* <Item
-                            title="Calendar"
-                            to="/calendar"
-                            icon={<CalendarTodayOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
-                        />
-                        <Item
-                            title="FAQ Page"
-                            to="/faq"
-                            icon={<HelpOutlineOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
-                        /> */}
-
 
                         {/* Actividades */}
                         <Typography
-                            variant="h6"
+                            fontSize={22}
                             color={colors.grey[300]}
                             sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
                         >
@@ -189,37 +165,20 @@ const Sidebar = () => {
                         </Typography>
                         <Item
                             title="Actividades"
-                            to="/invoices"
+                            to="/actividades"
                             icon={<BarChartOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
+                            currentPath={pathname}
                         />
                         <Item
                             title="Espacios"
-                            to="/form"
+                            to="/espacios"
                             icon={<MapOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
+                            currentPath={pathname}
                         />
-                        {/* <Item
-                            title="Line Chart"
-                            to="/line"
-                            icon={<TimelineOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
-                        />
-                        <Item
-                            title="Geography Chart"
-                            to="/geography"
-                            icon={<MapOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
-                        /> */}
 
                         {/* Eventos */}
-                        {/* Socios */}
                         <Typography
-                            variant="h6"
+                            fontSize={22}
                             color={colors.grey[300]}
                             sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
                         >
@@ -227,16 +186,14 @@ const Sidebar = () => {
                         </Typography>
                         <Item
                             title="Envio de Eventos"
-                            to="/verUsuarios"
+                            to="/eventos"
                             icon={<CalendarTodayOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
+                            currentPath={pathname}
                         />
 
                         {/* Reportes */}
-                        {/* Socios */}
                         <Typography
-                            variant="h6"
+                            fontSize={22}
                             color={colors.grey[300]}
                             sx={{ m: "15px 0 5px 20px", fontWeight: "bold" }}
                         >
@@ -246,23 +203,18 @@ const Sidebar = () => {
                             title="Reporte de Accidentes"
                             to="/team"
                             icon={<ReceiptOutlinedIcon />}
-                            selected={selected}
-                            setSelected={setSelected}
+                            currentPath={pathname}
                         />
                     </Box>
-                    <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                ml="15px"
-                            >
-                                <img
-                                    width="100%"
-                                    height="100%"
-                                    alt="profile-user"
-                                    src={`../../assets/logo2.png`}
-                                />
-                            </Box>
+
+                    <Box display="flex" justifyContent="space-between" alignItems="center" ml="15px">
+                        <img
+                            width="100%"
+                            height="100%"
+                            alt="profile-user"
+                            src={`../../assets/logo2.png`}
+                        />
+                    </Box>
                 </Menu>
             </ProSidebar>
         </Box>

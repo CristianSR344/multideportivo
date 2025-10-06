@@ -8,8 +8,12 @@ import Usuarios from "./scenes/verUsuarios";
 import Invoices from "./scenes/invoices";
 import Contacts from "./scenes/contacts";
 import Socios from "./scenes/socios";
+import Espacios from "./scenes/espacios";
+import Instructores from "./scenes/instructores";
 import VerSocios from "./scenes/verSocios";
 import Inicio from "./scenes/inicio";
+import Actividades from "./scenes/actividades";
+
 // import Bar from "./scenes/bar";
 // import Line from "./scenes/line";
 // import Pie from "./scenes/pie";
@@ -38,6 +42,9 @@ function App() {
             <Route path="/socios" element={<Socios />} />
             <Route path="/verSocios" element={<VerSocios />} />
             <Route path="/inicio" element={<Inicio />} />
+            <Route path="/actividades" element={<Actividades />} />
+            <Route path="/espacios" element={<Espacios />} />
+            <Route path="/instructores" element={<Instructores />} />
             {/* <Route path="/bar" element={<Bar />} /> */}
             {/* <Route path="/pie" element={<Pie />} /> */}
             {/* <Route path="/line" element={<Line />} /> */}

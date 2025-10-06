@@ -20,7 +20,6 @@ import { Link } from "react-router-dom";
    Valores iniciales del form
    =========================== */
 const initialValues = {
-    membresia: "",
     folio: "",
     password: "",
     nombres: "",
@@ -49,7 +48,7 @@ const userSchema = yup.object().shape({
     colonia: yup.string().required("Campo Requerido"),
 });
 
-const Socios = () => {
+const Instructores = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -58,7 +57,7 @@ const Socios = () => {
     const submitFormRef = useRef(null);
 
     // Estado para imagen (preview y archivo real)
-    const [avatarPreview, setAvatarPreview] = useState("/assets/user2.jpg"); // default
+    const [avatarPreview, setAvatarPreview] = useState("/assets/instructor.jpg"); // default
     const [avatarFile, setAvatarFile] = useState(null);
 
     // Handler de carga de imagen
@@ -92,8 +91,8 @@ const Socios = () => {
 
     return (
         <Box m="20px">
-            <Header title="SOCIOS" 
-            subtitle="Guardar o Actualizar Socio"/>
+            <Header title="Instructores" 
+            subtitle="Guardar o Actualizar Instructor"/>
             <Box display="flex" gap={4}>
                 {/* ======= Columna izquierda: Formulario ======= */}
                 <Box flex={3}>
@@ -125,38 +124,14 @@ const Socios = () => {
                                             },
                                         }}
                                     >
-                                        {/* Membresia */}
+
+                                        {/* Informacion del Instructor */}
                                         <Typography
                                             sx={{ minWidth: "100px", gridColumn: "span 2" }}
                                             fontWeight="bold"
                                             fontSize="28px"
                                         >
-                                            Informacion de Membresia
-                                        </Typography>
-
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
-                                            Tipo de Membresia
-                                        </Typography>
-                                        <FormControl fullWidth size="small">
-                                            <Select
-                                                placeholder="Tipo de Membresia"
-                                                value={values.membresia}
-                                                name="membresia"
-                                                onChange={handleChange}
-                                                sx={{ borderRadius: "20px" }}
-                                            >
-                                                <MenuItem value="individual">Individual</MenuItem>
-                                                <MenuItem value="familiar">Familiar</MenuItem>
-                                            </Select>
-                                        </FormControl>
-
-                                        {/* Informacion del Socio */}
-                                        <Typography
-                                            sx={{ minWidth: "100px", gridColumn: "span 2" }}
-                                            fontWeight="bold"
-                                            fontSize="28px"
-                                        >
-                                            Informacion del Socio
+                                            Informacion del Instructor
                                         </Typography>
 
                                         {/* Folio */}
@@ -475,11 +450,11 @@ const Socios = () => {
                     component={Link}
                     to="/verSocios"
                 >
-                    Ver Socios
+                    Ver Instructores
                 </Button>
             </Box>
         </Box>
     );
 };
 
-export default Socios;
+export default Instructores;

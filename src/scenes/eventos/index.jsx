@@ -49,7 +49,7 @@ const userSchema = yup.object().shape({
     colonia: yup.string().required("Campo Requerido"),
 });
 
-const Socios = () => {
+const Eventos = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -482,4 +482,4 @@ const Socios = () => {
     );
 };
 
-export default Socios;
+export default Eventos;

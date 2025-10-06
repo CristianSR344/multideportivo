@@ -4,6 +4,8 @@ import { tokens } from "../../theme";
 import { mockDataTeam } from "../../data/mockData";
 import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import SportsIcon from '@mui/icons-material/Sports';
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import Header from "../../components/header";
 
@@ -44,22 +46,26 @@ const Usuarios = () => {
                     <Box
                         width="60%"
                         m="0 auto"
+                        mt={1}
                         p="5px"
                         display="flex"
                         justifyContent="center"
                         backgroundColor={
                             access === "admin"
                                 ? colors.greenAccent[600]
-                                : access === "manager"
+                                : access === "enfermera"
+                                    ? colors.greenAccent[700]
+                                    : access === "entrenador"
                                     ? colors.greenAccent[700]
                                     : colors.greenAccent[700]
                         }
                         borderRadius="4px"
                     >
                         {access === "admin" && <AdminPanelSettingsOutlinedIcon />}
-                        {access === "manager" && <SecurityOutlinedIcon />}
-                        {access === "user" && <LockOpenOutlinedIcon />}
-                        <Typography color={colors.grey[100]} sx={{ ml: "5px" }}>
+                        {access === "socio" && <LockOpenOutlinedIcon />}
+                        {access === "enfermera" && <LocalHospitalIcon />}
+                        {access === "entrenador" && <SportsIcon />}
+                        <Typography color={colors.grey[100]} sx={{ ml: "5px", fontSize: "16px"}}>
                             {access}
                         </Typography>
                     </Box>

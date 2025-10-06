@@ -45,13 +45,13 @@ const Inicio = () => {
    */
   const actions = [
     {
-      to: "/invoices",
+      to: "/actividades",
       title: "Actividades",
       subtitle: "Administrar Actividades Disponibles",
       Icon: SportsBaseballIcon,
     },
     {
-      to: "/form",
+      to: "/espacios",
       title: "Espacios",
       subtitle: "Administrar los espacios disponibles",
       Icon: SportsSoccerIcon,
@@ -63,7 +63,7 @@ const Inicio = () => {
       Icon: PersonOutlineIcon,
     },
     {
-      to: "/contacts",
+      to: "/instructores",
       title: "Instructores",
       subtitle: "Administrar Instructores",
       Icon: EmojiEventsIcon,
@@ -120,7 +120,7 @@ const Inicio = () => {
               p: 3,
               height: 300,
               borderRadius: 3,
-              bgcolor:"transparent",
+              bgcolor: "transparent",
               transition: "all .18s ease",
               display: "flex",
               flexDirection: "column",
