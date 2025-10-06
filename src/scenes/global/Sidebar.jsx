@@ -6,14 +6,10 @@ import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import ReceiptOutlinedIcon from "@mui/icons-material/ReceiptOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
-import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
-import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutlined";
-import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 
@@ -116,7 +112,7 @@ const Sidebar = () => {
                         {/* Sidebar */}
                         <Item
                             title="Inicio"
-                            to="/"
+                            to="/inicio"
                             icon={<HomeOutlinedIcon />}
                             selected={selected}
                             setSelected={setSelected}
@@ -131,7 +127,7 @@ const Sidebar = () => {
                         </Typography>
                         <Item
                             title="Socios"
-                            to="/team"
+                            to="/socios"
                             icon={<PeopleOutlinedIcon />}
                             selected={selected}
                             setSelected={setSelected}
@@ -231,7 +227,7 @@ const Sidebar = () => {
                         </Typography>
                         <Item
                             title="Envio de Eventos"
-                            to="/team"
+                            to="/verUsuarios"
                             icon={<CalendarTodayOutlinedIcon />}
                             selected={selected}
                             setSelected={setSelected}
@@ -254,6 +250,19 @@ const Sidebar = () => {
                             setSelected={setSelected}
                         />
                     </Box>
+                    <Box
+                                display="flex"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                ml="15px"
+                            >
+                                <img
+                                    width="100%"
+                                    height="100%"
+                                    alt="profile-user"
+                                    src={`../../assets/logo2.png`}
+                                />
+                            </Box>
                 </Menu>
             </ProSidebar>
         </Box>

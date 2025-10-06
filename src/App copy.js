@@ -4,12 +4,10 @@ import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
 import { Routes, Route } from "react-router-dom";
-import Usuarios from "./scenes/verUsuarios";
+import Team from "./scenes/verUsuarios";
 import Invoices from "./scenes/invoices";
 import Contacts from "./scenes/contacts";
-import Socios from "./scenes/socios";
-import VerSocios from "./scenes/verSocios";
-import Inicio from "./scenes/inicio";
+import Form from "./scenes/form";
 // import Bar from "./scenes/bar";
 // import Line from "./scenes/line";
 // import Pie from "./scenes/pie";
@@ -32,12 +30,10 @@ function App() {
 
             <Routes>
             {/* <Route path="/" element={<Dashboard />} /> */}
-            <Route path="/verUsuarios" element={<Usuarios />} />
+            <Route path="/team" element={<Team />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/invoices" element={<Invoices />} />
-            <Route path="/socios" element={<Socios />} />
-            <Route path="/verSocios" element={<VerSocios />} />
-            <Route path="/inicio" element={<Inicio />} />
+            <Route path="/form" element={<Form />} />
             {/* <Route path="/bar" element={<Bar />} /> */}
             {/* <Route path="/pie" element={<Pie />} /> */}
             {/* <Route path="/line" element={<Line />} /> */}

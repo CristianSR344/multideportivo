@@ -1,13 +1,12 @@
-import { Box, Button, TextField, Typography, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { Box, Button, TextField, Typography, FormControl, InputLabel, Select, MenuItem, useTheme } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/header";
-import Contacts from "../contacts/index";
-import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { mockDataContacts } from "../../data/mockData";
+import { Link } from "react-router-dom";
+
+
 
 
 const initialValues = {
@@ -44,7 +43,7 @@ const userSchema = yup.object().shape({
 })
 
 
-const Form = () => {
+const Socios = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
 
@@ -56,50 +55,6 @@ const Form = () => {
     const headerName = (values) => {
         console.log(values);
     }
-
-    const columns = [
-        { field: "id", headerName: "ID", flex: 0.5 },
-        { field: "registrarId", headerName: "Registrar ID" },
-        {
-            field: "name",
-            headerName: "Name",
-            flex: 1,
-            cellClassName: "name-column--cell",
-        },
-        {
-            field: "age",
-            headerName: "Age",
-            type: "number",
-            headerAlign: "left",
-            align: "left",
-        },
-        {
-            field: "phone",
-            headerName: "Phone Number",
-            flex: 1,
-        },
-        {
-            field: "email",
-            headerName: "Email",
-            flex: 1,
-        },
-        {
-            field: "address",
-            headerName: "Address",
-            flex: 1,
-        },
-        {
-            field: "city",
-            headerName: "City",
-            flex: 1,
-        },
-        {
-            field: "zipCode",
-            headerName: "Zip Code",
-            flex: 1,
-        },
-    ];
-
 
     return <Box m="20px">
 
@@ -183,7 +138,7 @@ const Form = () => {
                                         },
                                     }}
                                 />
-                                
+
 
                                 <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">Nombres</Typography>
                                 <TextField
@@ -207,7 +162,7 @@ const Form = () => {
                                         },
                                     }}
                                 />
-                                
+
 
                                 <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">Apellido Paterno</Typography>
                                 <TextField
@@ -231,7 +186,7 @@ const Form = () => {
                                         },
                                     }}
                                 />
-                                
+
 
                                 <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">Apellido Materno</Typography>
                                 <TextField
@@ -255,7 +210,7 @@ const Form = () => {
                                         },
                                     }}
                                 />
-                                
+
 
                                 <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">Fecha de Nacimiento</Typography>
                                 <TextField
@@ -296,7 +251,7 @@ const Form = () => {
                                         <MenuItem value="femenino">Femenino</MenuItem>
                                     </Select>
                                 </FormControl>
-                                
+
                                 {/* Domicilio */}
                                 <Typography sx={{ minWidth: "100px", gridColumn: "span 2" }} fontWeight="bold" fontSize="28px">Domicilio</Typography>
                                 <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">Codigo Postal</Typography>
@@ -344,7 +299,7 @@ const Form = () => {
                                         },
                                     }}
                                 />
-                                
+
 
                                 <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">Calle</Typography>
                                 <TextField
@@ -368,7 +323,7 @@ const Form = () => {
                                         },
                                     }}
                                 />
-                                
+
 
                                 <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">Numero</Typography>
                                 <TextField
@@ -392,7 +347,7 @@ const Form = () => {
                                         },
                                     }}
                                 />
-                                
+
 
                             </Box>
 
@@ -404,7 +359,7 @@ const Form = () => {
             <Box
                 flex={1}
                 display="flex"
-                justifyContent="flex-start" 
+                justifyContent="flex-start"
                 alignItems="center"
                 sx={{ alignSelf: "center", mr: "100px", ml: "100px" }}
             >
@@ -429,48 +384,21 @@ const Form = () => {
             <Button type="submit" color="secondary" variant="contained" size="large" sx={{ mr: "20px", width: "300px" }}>
                 Eliminar
             </Button>
-
+            <Button
+                type="button"
+                color="secondary"
+                variant="contained"
+                size="large"
+                sx={{ mr: "20px", width: "300px" }}
+                component={Link}
+                to="/verSocios"   // 👈 ruta definida en tus <Routes>
+            >
+                Ver Socios
+            </Button>
         </Box>
 
-        <Box
-            m="40px 0 0 0"
-            height="75vh"
-            sx={{
-                "& .MuiDataGrid-root": {
-                    border: "none",
-                },
-                "& .MuiDataGrid-cell": {
-                    borderBottom: "none",
-                },
-                "& .name-column--cell": {
-                    color: colors.greenAccent[300],
-                },
-                "& .MuiDataGrid-columnHeaders": {
-                    backgroundColor: colors.blueAccent[700],
-                    borderBottom: "none",
-                },
-                "& .MuiDataGrid-virtualScroller": {
-                    backgroundColor: colors.primary[400],
-                },
-                "& .MuiDataGrid-footerContainer": {
-                    borderTop: "none",
-                    backgroundColor: colors.blueAccent[700],
-                },
-                "& .MuiCheckbox-root": {
-                    color: `${colors.greenAccent[200]} !important`,
-                },
-                "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-                    color: `${colors.grey[100]} !important`,
-                },
-            }}
-        >
-            <DataGrid
-                rows={mockDataContacts}
-                columns={columns}
-                showToolbar
-            />
-        </Box>
+        
     </Box>
 
 };
-export default Form;
+export default Socios;
