@@ -6,7 +6,7 @@ import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettin
 import LockOpenOutlinedIcon from "@mui/icons-material/LockOpenOutlined";
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import SportsIcon from '@mui/icons-material/Sports';
-import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+// import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
 import Header from "../../components/header";
 
 const Usuarios = () => {

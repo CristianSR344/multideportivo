@@ -53,7 +53,7 @@ const userSchema = yup.object().shape({
 
 const Espacios = () => {
     const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+    // const colors = tokens(theme.palette.mode);
     const isNonMobile = useMediaQuery("(min-width:600px)");
     const fileRef = useRef(null);
 
