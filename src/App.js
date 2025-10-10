@@ -33,15 +33,14 @@ function App() {
           <Sidebar />
           <main className="content">
             <Topbar />
-
             <Routes>
             {/* <Route path="/" element={<Dashboard />} /> */}
+            <Route path="/inicio" element={<Inicio />} />
             <Route path="/verUsuarios" element={<Usuarios />} />
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/invoices" element={<Invoices />} />
             <Route path="/socios" element={<Socios />} />
             <Route path="/verSocios" element={<VerSocios />} />
-            <Route path="/inicio" element={<Inicio />} />
             <Route path="/actividades" element={<Actividades />} />
             <Route path="/espacios" element={<Espacios />} />
             <Route path="/instructores" element={<Instructores />} />
