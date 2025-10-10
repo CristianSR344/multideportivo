@@ -34,7 +34,7 @@ const userSchema = yup.object().shape({
 
 const Actividades = () => {
     const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+    // const colors = tokens(theme.palette.mode);
     const isNonMobile = useMediaQuery("(min-width:600px)");
 
     const handleFormSubmit = (values) => {

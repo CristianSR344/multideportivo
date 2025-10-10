@@ -13,7 +13,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/header";
-import { tokens } from "../../theme";
+// import { tokens } from "../../theme";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 
@@ -52,7 +52,7 @@ const userSchema = yup.object().shape({
 });
 
 const Espacios = () => {
-    const theme = useTheme();
+    // const theme = useTheme();
     // const colors = tokens(theme.palette.mode);
     const isNonMobile = useMediaQuery("(min-width:600px)");
     const fileRef = useRef(null);
