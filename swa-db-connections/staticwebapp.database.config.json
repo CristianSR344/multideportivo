@@ -2,10 +2,10 @@
   "$schema": "https://github.com/Azure/data-api-builder/releases/download/v1.3.19/dab.draft.schema.json",
   "data-source": {
     "database-type": "mssql",
-    "connection-string": "Server=tcp:multideportivoserver.database.windows.net,1433;Initial Catalog=MultideportivoDB;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active",
     "options": {
       "set-session-context": false
-    }
+    },
+    "connection-string": "@env('DATABASE_CONNECTION_STRING')"
   },
   "runtime": {
     "rest": {
@@ -29,5 +29,15 @@
       "mode": "production"
     }
   },
-  "entities": {}
+  "entities": {
+    "Roles":{
+      "source":"dbo.roles",
+      "permissions": [
+        {
+          "actions":["read"],
+          "role": "anonymous"
+        }
+      ]
+    }
+  }
 }
