@@ -1,38 +1,26 @@
 import express from "express";
-import mysql from "mysql";
-import cors from "cors";
-
 const app = express();
+import cors from "cors";
+import userRoutes from "./routes/usuarios.js";
+// import sociosRoutes from "./routes/socios.js";
+// import rolesRoutes from "./routes/roles.js";
+// import membresiaRoutes from "./routes/membresia.js";
+import authRoutes from "./routes/auth.js";
+import cookieParser from "cookie-parser";
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "Cristian344",
-  database: "multideportivo"
-});
+//Middlewares
+app.use(express.json());
+app.use(cors());
+app.use(cookieParser());
+
 
 app.use(express.json());
 app.use(cors());
+app.use("/api/auth", authRoutes);
+app.use("/api/usuarios", userRoutes);
+// app.use("/api/socios", sociosRoutes);
+// app.use("/api/roles", rolesRoutes);
+// app.use("/api/membresia", membresiaRoutes);
 
-app.get("/", (req,res)=> res.json("Hello this is the backend"));
-
-app.get("/rol", (req,res)=>{
-  const q = "SELECT * FROM roles";
-  db.query(q, (err, data) => {
-    if (err) return res.status(500).json({error: err.message});
-    return res.json(data);
-  });
-});
-
-app.post("/rol", (req,res)=>{
-  const q = "INSERT INTO roles(`descripcion`) VALUES (?)";
-  const values = [req.body.descripcion
-  ];
-
-  db.query(q, [values], (err, data) => {
-    if (err) return res.status(500).json({error: err.message});
-    return res.json("Rol creado correctamente");
-  });
-});
 
 app.listen(8800, ()=> console.log("Backend server is running!"));
