@@ -12,8 +12,8 @@ import {
 import { Formik } from "formik";
 import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Header from "../../../../react-admin/src/components/header";
-import { tokens } from "../../../../react-admin/src/theme";
+import Header from "../../components/header.jsx";
+import { tokens } from "../../theme.js";
 import { Link } from "react-router-dom";
 import axios from "axios"; // ✅
 
