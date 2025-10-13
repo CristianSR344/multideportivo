@@ -1,13 +1,6 @@
 import { useRef, useState } from "react";
 import {
-    Box,
-    Button,
-    TextField,
-    Typography,
-    FormControl,
-    Select,
-    MenuItem,
-    useTheme,
+    Box, Button, Typography, useTheme,
 } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -15,10 +8,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/header";
 import { tokens } from "../../theme";
 import { Link } from "react-router-dom";
+import axios from "axios"; // ✅
 
-/* ===========================
-   Valores iniciales del form
-   =========================== */
 const initialValues = {
     membresia: "",
     folio: "",
@@ -27,6 +18,7 @@ const initialValues = {
     apellidoP: "",
     apellidoM: "",
     fechaN: "",
+    correo: "",
     sexo: "",
     codigoP: "",
     colonia: "",
@@ -34,11 +26,6 @@ const initialValues = {
     numero: "",
 };
 
-/* ===========================
-   Schema de validación (Yup)
-   *Nota*: quité campos "email" y "contact"
-   porque no existen en initialValues.
-   =========================== */
 const userSchema = yup.object().shape({
     folio: yup.string().required("Campo Requerido"),
     password: yup.string().required("Campo Requerido"),
@@ -53,15 +40,18 @@ const Socios = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
     const isNonMobile = useMediaQuery("(min-width:600px)");
-
-    // Ref para disparar submit desde el botón "Guardar" (fuera del <form>)
     const submitFormRef = useRef(null);
 
-    // Estado para imagen (preview y archivo real)
-    const [avatarPreview, setAvatarPreview] = useState("/assets/user2.jpg"); // default
+    const [avatarPreview, setAvatarPreview] = useState("/assets/user2.jpg");
     const [avatarFile, setAvatarFile] = useState(null);
+    const [err, setErr] = useState("");
 
-    // Handler de carga de imagen
+    // si tu backend corre en otro host/puerto:
+    const api = axios.create({
+        baseURL: "http://localhost:8800/api", // <-- ajusta a tu backend real
+        withCredentials: true,                // por si luego usas cookies
+    });
+
     const handleChangeImage = (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -70,49 +60,64 @@ const Socios = () => {
         setAvatarPreview(url);
     };
 
-    // Submit de Formik
-    const handleFormSubmit = (values) => {
-        console.log("🚀 Datos del socio:", values);
-        if (avatarFile) {
-            console.log("🖼️ Imagen seleccionada:", {
-                name: avatarFile.name,
-                size: avatarFile.size,
-                type: avatarFile.type,
-            });
-        } else {
-            console.log("🖼️ Sin imagen personalizada (se usó la predeterminada).");
-        }
+    // helper: archivo -> base64
+    const fileToBase64 = (file) =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(",")[1]); // solo payload base64
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
 
-        // Si luego envías a backend con multipart/form-data:
-        // const formData = new FormData();
-        // Object.entries(values).forEach(([k, v]) => formData.append(k, v));
-        // if (avatarFile) formData.append("foto", avatarFile);
-        // await fetch("/api/socios", { method: "POST", body: formData });
+    const handleFormSubmit = async (values) => {
+        try {
+            setErr("");
+
+            // preparar imagen en base64 (tu backend espera VARBINARY con Buffer.from(base64))
+            const imagenBase64 = avatarFile ? await fileToBase64(avatarFile) : null;
+
+            // mapear nombres del form -> backend (Azure SQL)
+            const payload = {
+                id_usuario: Number(values.folio),       // si ahora es IDENTITY y no lo envías, elimínalo
+                nombre: values.nombres,
+                apellidoP: values.apellidoP,
+                apellidoM: values.apellidoM,
+                correo: values.correo,            // si no lo capturas aún, manda algo o cambia el backend
+                password: values.password,
+                cp: Number(values.codigoP),
+                colonia: values.colonia,
+                calle: values.calle,
+                numero: values.numero ? Number(values.numero) : 0,
+                sexo: values.sexo || "M",
+                dob: values.fechaN || null,             // "YYYY-MM-DD"
+                imagen: imagenBase64,                   // null o base64
+                rol: 2,                                 // el que corresponda
+            };
+
+            // si tu columna id_usuario es IDENTITY y ya no se envía, elimina la propiedad del payload:
+            // delete payload.id_usuario;
+
+            await api.post("/auth/register", payload);
+
+            alert("¡Socio guardado!");
+        } catch (e) {
+            console.error(e);
+            setErr(e?.response?.data?.message || "Error al guardar");
+        }
     };
 
     return (
         <Box m="20px">
-            <Header title="SOCIOS" 
-            subtitle="Guardar o Actualizar Socio"/>
+            <Header title="SOCIOS" subtitle="Guardar o Actualizar Socio" />
             <Box display="flex" gap={4}>
-                {/* ======= Columna izquierda: Formulario ======= */}
                 <Box flex={3}>
                     <Formik
                         onSubmit={handleFormSubmit}
                         initialValues={initialValues}
                         validationSchema={userSchema}
                     >
-                        {({
-                            values,
-                            errors,
-                            touched,
-                            handleBlur,
-                            handleChange,
-                            handleSubmit,
-                        }) => {
-                            // Guardamos handleSubmit para usarlo con el botón externo "Guardar"
+                        {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => {
                             submitFormRef.current = handleSubmit;
-
                             return (
                                 <form onSubmit={handleSubmit}>
                                     <Box
@@ -391,90 +396,37 @@ const Socios = () => {
                     </Formik>
                 </Box>
 
-                {/* ======= Columna derecha: Foto con upload y preview ======= */}
-                <Box
-                    flex={1}
-                    display="flex"
-                    flexDirection="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    sx={{ alignSelf: "center", mr: "100px", ml: "100px" }}
-                >
-                    {/* Preview circular */}
-                    <Box
-                        sx={{
-                            width: 380,
-                            height: 380,
-                            borderRadius: "50%",
-                            overflow: "hidden",
-                            border: `4px solid ${colors.grey[300]}`,
-                            boxShadow:
-                                theme.palette.mode === "dark"
-                                    ? "0 6px 18px rgba(0,0,0,.4)"
-                                    : "0 6px 18px rgba(0,0,0,.1)",
-                        }}
-                    >
-                        <img
-                            src={avatarPreview}
-                            alt="Socio"
-                            style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                                display: "block",
-                            }}
-                        />
+                {/* derecha: imagen */}
+                <Box flex={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center" sx={{ alignSelf: "center", mr: "100px", ml: "100px" }}>
+                    <Box sx={{ width: 380, height: 380, borderRadius: "50%", overflow: "hidden", border: `4px solid ${colors.grey[300]}`, boxShadow: theme.palette.mode === "dark" ? "0 6px 18px rgba(0,0,0,.4)" : "0 6px 18px rgba(0,0,0,.1)" }}>
+                        <img src={avatarPreview} alt="Socio" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     </Box>
 
-                    {/* Botón para subir imagen */}
-                    <Button
-                        variant="contained"
-                        component="label"
-                        color="secondary"
-                        sx={{ mt: 2, px: 4 }}
-                    >
+                    <Button variant="contained" component="label" color="secondary" sx={{ mt: 2, px: 4 }}>
                         Subir Foto
-                        <input
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            onChange={handleChangeImage}
-                        />
+                        <input type="file" accept="image/*" hidden onChange={handleChangeImage} />
                     </Button>
                 </Box>
             </Box>
 
-            {/* ======= Botones inferiores ======= */}
+            {err && <Typography color="error" mt={2}>{err}</Typography>}
+
             <Box display="flex" justifyContent="end" mt="20px">
                 <Button
                     color="secondary"
                     variant="contained"
                     size="large"
                     sx={{ mr: "20px", width: "300px" }}
-                    onClick={() => submitFormRef.current?.()} // dispara el submit de Formik
+                    onClick={() => submitFormRef.current?.()}
                 >
                     Guardar
                 </Button>
 
-                <Button
-                    type="button"
-                    color="secondary"
-                    variant="contained"
-                    size="large"
-                    sx={{ mr: "20px", width: "300px" }}
-                >
+                <Button type="button" color="secondary" variant="contained" size="large" sx={{ mr: "20px", width: "300px" }}>
                     Eliminar
                 </Button>
 
-                <Button
-                    type="button"
-                    color="secondary"
-                    variant="contained"
-                    size="large"
-                    sx={{ mr: "20px", width: "300px" }}
-                    component={Link}
-                    to="/verSocios"
-                >
+                <Button type="button" color="secondary" variant="contained" size="large" sx={{ mr: "20px", width: "300px" }} component={Link} to="/verSocios">
                     Ver Socios
                 </Button>
             </Box>
