@@ -225,7 +225,11 @@ const Socios = () => {
                                                 onChange={handleChange}
                                                 sx={{ borderRadius: "20px" }}
                                                 error={!!touched.membresia && !!errors.membresia}
+                                                displayEmpty
                                             >
+                                                <MenuItem value="">
+                                                    <em>Selecciona una membresía</em>
+                                                </MenuItem>
                                                 {membresias.map((m) => (
                                                     <MenuItem key={m.idMembresia} value={m.idMembresia}>
                                                         {m.descripcion}
