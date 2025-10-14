@@ -75,9 +75,9 @@ const Socios = () => {
     useEffect(() => {
         const fetchCatalogos = async () => {
             try {
-                const resRoles = await api.get("/api/catalogos/roles");
+                const resRoles = await api.get("/api/roles/getRoles");
                 setRoles(resRoles.data || []);
-                const resMembresias = await api.get("/api/catalogos/membresias");
+                const resMembresias = await api.get("/api/membresia/membresias");
                 setMembresias(resMembresias.data || []);
             } catch (e) {
                 console.error("Error cargando catálogos:", e);
