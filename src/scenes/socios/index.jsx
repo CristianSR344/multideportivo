@@ -68,7 +68,7 @@ const Socios = () => {
     const api = axios.create({
         baseURL:
             "https://multideportivobackend-aecmffdgfwf9bmg8.mexicocentral-01.azurewebsites.net",
-        withCredentials: true,
+        // withCredentials: true,
     });
 
     // cargar catálogos al montar
