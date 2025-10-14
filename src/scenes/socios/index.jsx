@@ -31,6 +31,7 @@ const initialValues = {
     colonia: "",
     calle: "",
     numero: "",
+    rol: "",
 };
 
 const userSchema = yup.object().shape({
@@ -39,9 +40,12 @@ const userSchema = yup.object().shape({
     nombres: yup.string().required("Campo Requerido"),
     apellidoP: yup.string().required("Campo Requerido"),
     apellidoM: yup.string().required("Campo Requerido"),
+    correo: yup.string().email("Correo inválido").required("Campo Requerido"),
     codigoP: yup.string().required("Campo Requerido"),
     colonia: yup.string().required("Campo Requerido"),
+    rol: yup.number().required("Campo Requerido"),
 });
+
 
 const Socios = () => {
     const theme = useTheme();
@@ -55,8 +59,8 @@ const Socios = () => {
 
     // si tu backend corre en otro host/puerto:
     const api = axios.create({
-        baseURL: "http://localhost:8800/api", // <-- ajusta a tu backend real
-        withCredentials: true,                // por si luego usas cookies
+        baseURL: "https://multideportivobackend-aecmffdgfwf9bmg8.mexicocentral-01.azurewebsites.net",
+        withCredentials: true,
     });
 
     const handleChangeImage = (e) => {
@@ -76,46 +80,44 @@ const Socios = () => {
             reader.readAsDataURL(file);
         });
 
-    const handleFormSubmit = async (values) => {
+    const handleFormSubmit = async (values, { resetForm }) => {
         try {
             setErr("");
-
-            // preparar imagen en base64 (tu backend espera VARBINARY con Buffer.from(base64))
             const imagenBase64 = avatarFile ? await fileToBase64(avatarFile) : null;
 
-            // mapear nombres del form -> backend (Azure SQL)
             const payload = {
-                id_usuario: Number(values.folio),       // si ahora es IDENTITY y no lo envías, elimínalo
+                // id_usuario: Number(values.folio), // <-- si es IDENTITY, NO lo envíes
                 nombre: values.nombres,
                 apellidoP: values.apellidoP,
                 apellidoM: values.apellidoM,
-                correo: values.correo,            // si no lo capturas aún, manda algo o cambia el backend
+                correo: values.correo,
                 password: values.password,
                 cp: Number(values.codigoP),
                 colonia: values.colonia,
                 calle: values.calle,
                 numero: values.numero ? Number(values.numero) : 0,
-                sexo: values.sexo || "M",
-                dob: values.fechaN || null,             // "YYYY-MM-DD"
-                imagen: imagenBase64,                   // null o base64
-                rol: 2,                                 // el que corresponda
+                sexo: values.sexo === "masculino" ? 1 : 0,
+                dob: values.fechaN || null,
+                imagen: imagenBase64, // base64 o null
+                rol: Number(values.rol), // <— importante
             };
 
-            // si tu columna id_usuario es IDENTITY y ya no se envía, elimina la propiedad del payload:
-            // delete payload.id_usuario;
 
-            await api.post("/auth/register", payload);
-
-            alert("¡Socio guardado!");
+            await api.post("/api/auth/register", payload);
+            alert("¡Usuario guardado!");
+            resetForm();
+            setAvatarFile(null);
+            setAvatarPreview("/assets/user2.jpg");
         } catch (e) {
             console.error(e);
             setErr(e?.response?.data?.message || "Error al guardar");
         }
     };
 
+
     return (
         <Box m="20px">
-            <Header title="SOCIOS" subtitle="Guardar o Actualizar Socio" />
+            <Header title="USUARIOS" subtitle="Guardar o Actualizar Usuario" />
             <Box display="flex" gap={4}>
                 <Box flex={3}>
                     <Formik
@@ -137,6 +139,32 @@ const Socios = () => {
                                             },
                                         }}
                                     >
+
+                                        {/* Tipo de Usuario */}
+                                        <Typography
+                                            sx={{ minWidth: "100px", gridColumn: "span 2" }}
+                                            fontWeight="bold"
+                                            fontSize="28px"
+                                        >
+                                            Tipo de Usuario
+                                        </Typography>
+
+                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                            Rol
+                                        </Typography>
+                                        <FormControl fullWidth size="small">
+                                            <Select
+                                                placeholder="Rol"
+                                                value={values.rol}
+                                                name="rol"
+                                                onChange={handleChange}
+                                                sx={{ borderRadius: "20px" }}
+                                            >
+                                                <MenuItem value="individual">Individual</MenuItem>
+                                                <MenuItem value="familiar">Familiar</MenuItem>
+                                            </Select>
+                                        </FormControl>
+
                                         {/* Membresia */}
                                         <Typography
                                             sx={{ minWidth: "100px", gridColumn: "span 2" }}
@@ -199,7 +227,7 @@ const Socios = () => {
                                             fullWidth
                                             size="small"
                                             variant="outlined"
-                                            type="text"
+                                            type="password"
                                             placeholder="Password"
                                             onBlur={handleBlur}
                                             onChange={handleChange}
@@ -267,6 +295,26 @@ const Socios = () => {
                                             name="apellidoM"
                                             error={!!touched.apellidoM && !!errors.apellidoM}
                                             helperText={touched.apellidoM && errors.apellidoM}
+                                            sx={{ gridColumn: "span 1" }}
+                                            slotProps={{ input: { sx: { borderRadius: "20px" } } }}
+                                        />
+
+                                        {/* Correo */}
+                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                            Correo
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            variant="outlined"
+                                            type="text"
+                                            placeholder="Correo"
+                                            onBlur={handleBlur}
+                                            onChange={handleChange}
+                                            value={values.correo}
+                                            name="correo"
+                                            error={!!touched.correo && !!errors.correo}
+                                            helperText={touched.correo && errors.correo}
                                             sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
