@@ -67,7 +67,7 @@ const Socios = () => {
     // instancia de axios (ajusta si cambia tu dominio)
     const api = axios.create({
         baseURL:
-            "http://multideportivobackend-aecmffdgfwf9bmg8.mexicocentral-01.azurewebsites.net",
+            "https://multideportivobackend-aecmffdgfwf9bmg8.mexicocentral-01.azurewebsites.net",
         withCredentials: true,
     });
 
