@@ -67,7 +67,7 @@ const Socios = () => {
     // instancia de axios (ajusta si cambia tu dominio)
     const api = axios.create({
         baseURL:
-            "https://multideportivobackend-aecmffdgfwf9bmg8.mexicocentral-01.azurewebsites.net",
+            "http://multideportivobackend-aecmffdgfwf9bmg8.mexicocentral-01.azurewebsites.net",
         withCredentials: true,
     });
 
@@ -127,7 +127,7 @@ const Socios = () => {
                 imagen: imagenBase64, // base64 o null
                 rol: Number(values.rol), // idRoles desde el select
                 // Si guardarás membresía en otra tabla/campo:
-                // membresiaId: Number(values.membresia),
+                membresiaId: Number(values.membresia),
             };
 
             await api.post("/api/auth/register", payload);
