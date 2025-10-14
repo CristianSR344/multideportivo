@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+// src/scenes/socios/index.jsx
+import { useRef, useState, useEffect } from "react";
 import {
     Box,
     Button,
@@ -15,10 +16,10 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/header";
 import { tokens } from "../../theme";
 import { Link } from "react-router-dom";
-import axios from "axios"; // ✅
+import axios from "axios";
 
 const initialValues = {
-    membresia: "",
+    membresia: "", // idMembresia
     folio: "",
     password: "",
     nombres: "",
@@ -26,12 +27,12 @@ const initialValues = {
     apellidoM: "",
     fechaN: "",
     correo: "",
-    sexo: "",
+    sexo: "",      // "masculino" | "femenino"
     codigoP: "",
     colonia: "",
     calle: "",
     numero: "",
-    rol: "",
+    rol: "",       // idRoles
 };
 
 const userSchema = yup.object().shape({
@@ -43,9 +44,12 @@ const userSchema = yup.object().shape({
     correo: yup.string().email("Correo inválido").required("Campo Requerido"),
     codigoP: yup.string().required("Campo Requerido"),
     colonia: yup.string().required("Campo Requerido"),
-    rol: yup.number().required("Campo Requerido"),
+    rol: yup.number().typeError("Selecciona un rol").required("Campo Requerido"),
+    membresia: yup
+        .number()
+        .typeError("Selecciona una membresía")
+        .required("Campo Requerido"),
 });
-
 
 const Socios = () => {
     const theme = useTheme();
@@ -57,11 +61,31 @@ const Socios = () => {
     const [avatarFile, setAvatarFile] = useState(null);
     const [err, setErr] = useState("");
 
-    // si tu backend corre en otro host/puerto:
+    const [roles, setRoles] = useState([]);
+    const [membresias, setMembresias] = useState([]);
+
+    // instancia de axios (ajusta si cambia tu dominio)
     const api = axios.create({
-        baseURL: "https://multideportivobackend-aecmffdgfwf9bmg8.mexicocentral-01.azurewebsites.net",
+        baseURL:
+            "https://multideportivobackend-aecmffdgfwf9bmg8.mexicocentral-01.azurewebsites.net",
         withCredentials: true,
     });
+
+    // cargar catálogos al montar
+    useEffect(() => {
+        const fetchCatalogos = async () => {
+            try {
+                const resRoles = await api.get("/api/catalogos/roles");
+                setRoles(resRoles.data || []);
+                const resMembresias = await api.get("/api/catalogos/membresias");
+                setMembresias(resMembresias.data || []);
+            } catch (e) {
+                console.error("Error cargando catálogos:", e);
+            }
+        };
+        fetchCatalogos();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleChangeImage = (e) => {
         const file = e.target.files?.[0];
@@ -71,11 +95,11 @@ const Socios = () => {
         setAvatarPreview(url);
     };
 
-    // helper: archivo -> base64
+    // archivo -> base64 (solo payload)
     const fileToBase64 = (file) =>
         new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(",")[1]); // solo payload base64
+            reader.onload = () => resolve(reader.result.split(",")[1]);
             reader.onerror = reject;
             reader.readAsDataURL(file);
         });
@@ -83,10 +107,12 @@ const Socios = () => {
     const handleFormSubmit = async (values, { resetForm }) => {
         try {
             setErr("");
+
             const imagenBase64 = avatarFile ? await fileToBase64(avatarFile) : null;
 
             const payload = {
-                // id_usuario: Number(values.folio), // <-- si es IDENTITY, NO lo envíes
+                // Si id_usuario es IDENTITY en SQL, NO lo envíes:
+                // id_usuario: Number(values.folio),
                 nombre: values.nombres,
                 apellidoP: values.apellidoP,
                 apellidoM: values.apellidoM,
@@ -99,12 +125,14 @@ const Socios = () => {
                 sexo: values.sexo === "masculino" ? 1 : 0,
                 dob: values.fechaN || null,
                 imagen: imagenBase64, // base64 o null
-                rol: Number(values.rol), // <— importante
+                rol: Number(values.rol), // idRoles desde el select
+                // Si guardarás membresía en otra tabla/campo:
+                // membresiaId: Number(values.membresia),
             };
-
 
             await api.post("/api/auth/register", payload);
             alert("¡Usuario guardado!");
+
             resetForm();
             setAvatarFile(null);
             setAvatarPreview("/assets/user2.jpg");
@@ -113,7 +141,6 @@ const Socios = () => {
             setErr(e?.response?.data?.message || "Error al guardar");
         }
     };
-
 
     return (
         <Box m="20px">
@@ -125,7 +152,14 @@ const Socios = () => {
                         initialValues={initialValues}
                         validationSchema={userSchema}
                     >
-                        {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => {
+                        {({
+                            values,
+                            errors,
+                            touched,
+                            handleBlur,
+                            handleChange,
+                            handleSubmit,
+                        }) => {
                             submitFormRef.current = handleSubmit;
                             return (
                                 <form onSubmit={handleSubmit}>
@@ -139,68 +173,83 @@ const Socios = () => {
                                             },
                                         }}
                                     >
-
                                         {/* Tipo de Usuario */}
                                         <Typography
-                                            sx={{ minWidth: "100px", gridColumn: "span 2" }}
+                                            sx={{ gridColumn: "span 2" }}
                                             fontWeight="bold"
                                             fontSize="28px"
                                         >
                                             Tipo de Usuario
                                         </Typography>
 
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Rol
                                         </Typography>
                                         <FormControl fullWidth size="small">
                                             <Select
-                                                placeholder="Rol"
                                                 value={values.rol}
                                                 name="rol"
                                                 onChange={handleChange}
                                                 sx={{ borderRadius: "20px" }}
+                                                error={!!touched.rol && !!errors.rol}
                                             >
-                                                <MenuItem value="individual">Individual</MenuItem>
-                                                <MenuItem value="familiar">Familiar</MenuItem>
+                                                {roles.map((r) => (
+                                                    <MenuItem key={r.idRoles} value={r.idRoles}>
+                                                        {r.descripcion}
+                                                    </MenuItem>
+                                                ))}
                                             </Select>
+                                            {touched.rol && errors.rol && (
+                                                <Typography color="error" variant="caption">
+                                                    {errors.rol}
+                                                </Typography>
+                                            )}
                                         </FormControl>
 
-                                        {/* Membresia */}
+                                        {/* Membresía */}
                                         <Typography
-                                            sx={{ minWidth: "100px", gridColumn: "span 2" }}
+                                            sx={{ gridColumn: "span 2" }}
                                             fontWeight="bold"
                                             fontSize="28px"
                                         >
-                                            Informacion de Membresia
+                                            Información de Membresía
                                         </Typography>
 
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
-                                            Tipo de Membresia
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
+                                            Tipo de Membresía
                                         </Typography>
                                         <FormControl fullWidth size="small">
                                             <Select
-                                                placeholder="Tipo de Membresia"
                                                 value={values.membresia}
                                                 name="membresia"
                                                 onChange={handleChange}
                                                 sx={{ borderRadius: "20px" }}
+                                                error={!!touched.membresia && !!errors.membresia}
                                             >
-                                                <MenuItem value="individual">Individual</MenuItem>
-                                                <MenuItem value="familiar">Familiar</MenuItem>
+                                                {membresias.map((m) => (
+                                                    <MenuItem key={m.idMembresia} value={m.idMembresia}>
+                                                        {m.descripcion}
+                                                    </MenuItem>
+                                                ))}
                                             </Select>
+                                            {touched.membresia && errors.membresia && (
+                                                <Typography color="error" variant="caption">
+                                                    {errors.membresia}
+                                                </Typography>
+                                            )}
                                         </FormControl>
 
-                                        {/* Informacion del Socio */}
+                                        {/* Información del Socio */}
                                         <Typography
-                                            sx={{ minWidth: "100px", gridColumn: "span 2" }}
+                                            sx={{ gridColumn: "span 2" }}
                                             fontWeight="bold"
                                             fontSize="28px"
                                         >
-                                            Informacion del Socio
+                                            Información del Socio
                                         </Typography>
 
-                                        {/* Folio */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        {/* Folio  */}
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Folio
                                         </Typography>
                                         <TextField
@@ -215,12 +264,11 @@ const Socios = () => {
                                             name="folio"
                                             error={!!touched.folio && !!errors.folio}
                                             helperText={touched.folio && errors.folio}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Password */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Password
                                         </Typography>
                                         <TextField
@@ -235,12 +283,11 @@ const Socios = () => {
                                             name="password"
                                             error={!!touched.password && !!errors.password}
                                             helperText={touched.password && errors.password}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Nombres */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Nombres
                                         </Typography>
                                         <TextField
@@ -255,12 +302,11 @@ const Socios = () => {
                                             name="nombres"
                                             error={!!touched.nombres && !!errors.nombres}
                                             helperText={touched.nombres && errors.nombres}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Apellido Paterno */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Apellido Paterno
                                         </Typography>
                                         <TextField
@@ -275,12 +321,11 @@ const Socios = () => {
                                             name="apellidoP"
                                             error={!!touched.apellidoP && !!errors.apellidoP}
                                             helperText={touched.apellidoP && errors.apellidoP}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Apellido Materno */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Apellido Materno
                                         </Typography>
                                         <TextField
@@ -295,12 +340,11 @@ const Socios = () => {
                                             name="apellidoM"
                                             error={!!touched.apellidoM && !!errors.apellidoM}
                                             helperText={touched.apellidoM && errors.apellidoM}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Correo */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Correo
                                         </Typography>
                                         <TextField
@@ -315,12 +359,11 @@ const Socios = () => {
                                             name="correo"
                                             error={!!touched.correo && !!errors.correo}
                                             helperText={touched.correo && errors.correo}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Fecha de Nacimiento */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Fecha de Nacimiento
                                         </Typography>
                                         <TextField
@@ -335,17 +378,15 @@ const Socios = () => {
                                             name="fechaN"
                                             error={!!touched.fechaN && !!errors.fechaN}
                                             helperText={touched.fechaN && errors.fechaN}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Sexo */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Sexo
                                         </Typography>
                                         <FormControl fullWidth size="small">
                                             <Select
-                                                placeholder="Sexo"
                                                 value={values.sexo}
                                                 name="sexo"
                                                 onChange={handleChange}
@@ -358,7 +399,7 @@ const Socios = () => {
 
                                         {/* Domicilio */}
                                         <Typography
-                                            sx={{ minWidth: "100px", gridColumn: "span 2" }}
+                                            sx={{ gridColumn: "span 2" }}
                                             fontWeight="bold"
                                             fontSize="28px"
                                         >
@@ -366,27 +407,26 @@ const Socios = () => {
                                         </Typography>
 
                                         {/* Código Postal */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
-                                            Codigo Postal
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
+                                            Código Postal
                                         </Typography>
                                         <TextField
                                             fullWidth
                                             size="small"
                                             variant="outlined"
                                             type="text"
-                                            placeholder="Codigo Postal"
+                                            placeholder="Código Postal"
                                             onBlur={handleBlur}
                                             onChange={handleChange}
                                             value={values.codigoP}
                                             name="codigoP"
                                             error={!!touched.codigoP && !!errors.codigoP}
                                             helperText={touched.codigoP && errors.codigoP}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Colonia */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Colonia
                                         </Typography>
                                         <TextField
@@ -401,12 +441,11 @@ const Socios = () => {
                                             name="colonia"
                                             error={!!touched.colonia && !!errors.colonia}
                                             helperText={touched.colonia && errors.colonia}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Calle */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
                                             Calle
                                         </Typography>
                                         <TextField
@@ -421,27 +460,25 @@ const Socios = () => {
                                             name="calle"
                                             error={!!touched.calle && !!errors.calle}
                                             helperText={touched.calle && errors.calle}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
 
                                         {/* Número */}
-                                        <Typography sx={{ minWidth: "100px", ml: "15px" }} fontSize="24px">
-                                            Numero
+                                        <Typography sx={{ ml: "15px" }} fontSize="24px">
+                                            Número
                                         </Typography>
                                         <TextField
                                             fullWidth
                                             size="small"
                                             variant="outlined"
                                             type="text"
-                                            placeholder="Numero"
+                                            placeholder="Número"
                                             onBlur={handleBlur}
                                             onChange={handleChange}
                                             value={values.numero}
                                             name="numero"
                                             error={!!touched.numero && !!errors.numero}
                                             helperText={touched.numero && errors.numero}
-                                            sx={{ gridColumn: "span 1" }}
                                             slotProps={{ input: { sx: { borderRadius: "20px" } } }}
                                         />
                                     </Box>
@@ -452,19 +489,56 @@ const Socios = () => {
                 </Box>
 
                 {/* derecha: imagen */}
-                <Box flex={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center" sx={{ alignSelf: "center", mr: "100px", ml: "100px" }}>
-                    <Box sx={{ width: 380, height: 380, borderRadius: "50%", overflow: "hidden", border: `4px solid ${colors.grey[300]}`, boxShadow: theme.palette.mode === "dark" ? "0 6px 18px rgba(0,0,0,.4)" : "0 6px 18px rgba(0,0,0,.1)" }}>
-                        <img src={avatarPreview} alt="Socio" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                <Box
+                    flex={1}
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{ alignSelf: "center", mr: "100px", ml: "100px" }}
+                >
+                    <Box
+                        sx={{
+                            width: 380,
+                            height: 380,
+                            borderRadius: "50%",
+                            overflow: "hidden",
+                            border: `4px solid ${colors.grey[300]}`,
+                            boxShadow:
+                                theme.palette.mode === "dark"
+                                    ? "0 6px 18px rgba(0,0,0,.4)"
+                                    : "0 6px 18px rgba(0,0,0,.1)",
+                        }}
+                    >
+                        <img
+                            src={avatarPreview}
+                            alt="Socio"
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                display: "block",
+                            }}
+                        />
                     </Box>
 
-                    <Button variant="contained" component="label" color="secondary" sx={{ mt: 2, px: 4 }}>
+                    <Button
+                        variant="contained"
+                        component="label"
+                        color="secondary"
+                        sx={{ mt: 2, px: 4 }}
+                    >
                         Subir Foto
                         <input type="file" accept="image/*" hidden onChange={handleChangeImage} />
                     </Button>
                 </Box>
             </Box>
 
-            {err && <Typography color="error" mt={2}>{err}</Typography>}
+            {err && (
+                <Typography color="error" mt={2}>
+                    {err}
+                </Typography>
+            )}
 
             <Box display="flex" justifyContent="end" mt="20px">
                 <Button
@@ -477,11 +551,25 @@ const Socios = () => {
                     Guardar
                 </Button>
 
-                <Button type="button" color="secondary" variant="contained" size="large" sx={{ mr: "20px", width: "300px" }}>
+                <Button
+                    type="button"
+                    color="secondary"
+                    variant="contained"
+                    size="large"
+                    sx={{ mr: "20px", width: "300px" }}
+                >
                     Eliminar
                 </Button>
 
-                <Button type="button" color="secondary" variant="contained" size="large" sx={{ mr: "20px", width: "300px" }} component={Link} to="/verSocios">
+                <Button
+                    type="button"
+                    color="secondary"
+                    variant="contained"
+                    size="large"
+                    sx={{ mr: "20px", width: "300px" }}
+                    component={Link}
+                    to="/verSocios"
+                >
                     Ver Socios
                 </Button>
             </Box>
